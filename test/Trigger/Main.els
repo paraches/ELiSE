@@ -1,0 +1,19 @@
+class Main {
+    function void main() {
+	    var int i, j;
+	    var boolean loop;
+
+        let i = 0;
+	    let loop = true;
+
+	    while (loop) {
+	        let i = Keyboard.stick0();
+	        if (i != 0) {
+	            do Output.printInt(i);
+	        }
+	        let loop = Keyboard.trigger0() == 0;
+	    }
+
+        return;
+    }
+}

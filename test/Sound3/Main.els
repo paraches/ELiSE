@@ -1,0 +1,9 @@
+class Main {
+    function void main() {
+        do Sound.init();
+        do Sound.play3(254, 10, 320, 10, 381, 10, 1);
+        do Timer.waitFrames(1);
+        do Sound.stop();
+        return;
+    }
+}

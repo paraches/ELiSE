@@ -1,0 +1,79 @@
+class Main {
+    function void main() {
+        var Array enemies;
+        var Enemy enemy;
+        var int i, address, mem_free_list;
+
+        mem_free_list = Debug.memFreeList();
+        Output.printIntHexLn(mem_free_list);
+
+        address = Debug.heapAddress();
+        address = address & 0xFFF0;
+        Debug.memDump(address, 6);
+
+        enemies = Array.new(2);
+
+
+        i = 0;
+
+        while (i < 2) {
+            enemies[i] = Enemy.new(i + 10, i * 2);
+            i = ++i;
+        }
+
+
+        mem_free_list = Debug.memFreeList();
+        Output.printIntHexLn(mem_free_list);
+
+        Debug.memDump(address, 6);
+
+        i = 0;
+        while (i < 2) {
+            enemy = enemies[i];
+            enemy.dispose();
+            i = ++i;
+        }
+
+        enemies.deAlloc();
+
+        mem_free_list = Debug.memFreeList();
+        Output.printIntHexLn(mem_free_list);
+
+        Debug.memDump(address, 6);
+
+        return;
+    }
+
+    function void test() {
+        var Enemy obj1, obj2;
+        var int address, mem_free_list;
+
+        mem_free_list = Debug.memFreeList();
+        Output.printIntHexLn(mem_free_list);
+
+        address = Debug.heapAddress();
+        address = address & 0xFFF0;
+        Debug.memDump(address, 6);
+
+        obj1 = Enemy.new(15, 12);
+        obj2 = Enemy.new(30, 24);
+
+        obj1.print();
+        obj2.print();
+
+        mem_free_list = Debug.memFreeList();
+        Output.printIntHexLn(mem_free_list);
+
+        Debug.memDump(address, 6);
+
+        obj1.dispose();
+        obj2.dispose();
+
+        mem_free_list = Debug.memFreeList();
+        Output.printIntHexLn(mem_free_list);
+
+        Debug.memDump(address, 6);
+
+        return;
+    }
+}

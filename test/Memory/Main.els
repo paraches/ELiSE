@@ -1,0 +1,22 @@
+#
+#   answer: FF,
+#           8600, 860A (depends on environment. right = left + 10 (3x2+4))
+#
+class Main {
+    function void main() {
+	    var int i, j;
+
+	    let i = 0xd000;
+	    do Memory.poke(i, 0xFF);
+	    let j = Memory.peek(i);
+	    do Output.printIntHexLn(j);
+
+	    let i = Memory.alloc(3);
+	    do Output.printIntHexLn(i);
+
+	    let j = Memory.alloc(2);
+	    do Output.printIntHexLn(j);
+
+        return;
+    }
+}

@@ -1,0 +1,10 @@
+class Main {
+    function void main() {
+        var Breakout2 game;
+
+        game = Breakout2.new();
+        game.run();
+
+        return;
+    }
+}

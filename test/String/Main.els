@@ -1,0 +1,39 @@
+#
+#   answer: abc, 1234, 3
+#           0F, 72, BC, 40
+#
+class Main {
+    function void main() {
+        var String i, j, k;
+        var int length, c, l;
+
+        let i = "abc";
+        do Output.printStr255Ln(i);
+        do Output.printStr255Ln("1234");
+        do Output.printIntLn(i.length());
+
+        do i.dispose();
+
+        let i = "0F72BC40";
+        let c = 0;
+        let length = i.length() / 2;
+        while (length > 0) {
+            let j = i.charAt(c);
+            let k = i.charAt(c+1);
+            let l = Main.HtoI(j) * 16 + Main.HtoI(k);
+            do Output.printIntHexLn(l);
+            let c = c + 2;
+            let length = length - 1;
+        }
+
+        return;
+    }
+
+    function int HtoI(int value) {
+        let value = value - 48; // '0'
+        if (value >= 10) {
+            let value = value - 7;
+        }
+        return value;
+    }
+}

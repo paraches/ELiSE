@@ -1,0 +1,93 @@
+#
+#   answer: zero, zero/other, one/two, other/one/two/three/other
+#
+class Main {
+    function void main() {
+        var int i;
+
+        Output.printStringLn("If");
+        i = 0;
+        Main.onlyIf(i);
+        i = 1;
+        Main.onlyIf(i);
+        Output.printLn();
+
+        Output.printStringLn("If else");
+        i = 0;
+        Main.ifElse(i);
+        i = 1;
+        Main.ifElse(i);
+        Output.printLn();
+
+        Output.printStringLn("If elif");
+        i = 0;
+        Main.ifElif(i);
+        i = 1;
+        Main.ifElif(i);
+        i = 2;
+        Main.ifElif(i);
+        Output.printLn();
+
+        Output.printStringLn("If elif else");
+        i = 0;
+        Main.showValue(i);
+        i = 1;
+        Main.showValue(i);
+        i = 2;
+        Main.showValue(i);
+        i = 3;
+        Main.showValue(i);
+        i = 4;
+        Main.showValue(i);
+
+        return;
+    }
+
+    function void showValue(int i) {
+        if (i == 1) {
+            Output.printStringLn("One");
+        }
+        elif (i == 2) {
+            Output.printStringLn("Two");
+        }
+        elif (i == 3) {
+            Output.printStringLn("Three");
+        }
+        else {
+            Output.printStringLn("Other");
+        }
+
+        return;
+    }
+
+    function void onlyIf(int i) {
+        if (i == 0) {
+            Output.printStringLn("Zero");
+        }
+
+        return;
+    }
+
+    function void ifElse(int i) {
+        if (i == 0) {
+            Output.printStringLn("Zero");
+        }
+        else {
+            Output.printStringLn("Other");
+        }
+
+        return;
+    }
+
+    function void ifElif(int i) {
+        if (i == 1) {
+            Output.printStringLn("One");
+        }
+        elif (i == 2) {
+            Output.printStringLn("Two");
+        }
+
+        return;
+    }
+
+}

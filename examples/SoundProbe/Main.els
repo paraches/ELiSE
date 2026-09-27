@@ -1,0 +1,21 @@
+class Main {
+    function void main() {
+        do MSX.screenInit();
+        do MSX.keyClick(false);
+        do Screen.color(15, 1, 1);
+        do Screen.cls();
+        do Timer.start();
+
+        do Screen.locate(1, 1);
+        do Output.printString("PSG 3CH + TIMER");
+        do Sound.init();
+        do Sound.play3(254, 10, 320, 10, 381, 10, 180);
+        do Timer.waitFrames(180);
+        do Sound.stop();
+
+        do Timer.stop();
+        do Screen.locate(1, 3);
+        do Output.printString("DONE");
+        return;
+    }
+}

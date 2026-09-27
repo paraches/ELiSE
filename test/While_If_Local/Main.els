@@ -1,0 +1,23 @@
+#
+#   answer: 1, 3, 5, 7, 9, B, D, F
+#
+class Main {
+    function void main() {
+	    var int i, j;
+
+	    let i = 0;
+	    let j = 1;
+
+	    while (j < 16) {
+	        if (j < 10) {
+	        do Output.printIntLn(j);
+	        }
+	        else {
+	            do Output.printIntHexLn(j):
+	        }
+	        let i = i + 1;
+	        let j = j + 2;
+	    }
+        return;
+    }
+}

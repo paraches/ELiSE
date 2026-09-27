@@ -1,0 +1,32 @@
+class Main {
+    function void main() {
+	    var int i, j, k, l;
+
+	    i = Memory.alloc(3);
+	    Output.printIntHexLn(i);    // 0xC004
+
+	    j = Memory.alloc(5);
+	    Output.printIntHexLn(j);    // 0xC00E
+
+        Memory.deAlloc(j);          // mem_free_list is 0xC00A
+
+        k = Memory.alloc(3);
+        Output.printIntHexLn(k);    // 0xC00E
+
+        Memory.deAlloc(k);          // mem_free_list is 0xC00A
+
+        j = Memory.alloc(5);
+        Output.printIntHexLn(j);    // 0xC01C   mem_free_list is 0xC00A
+                                    // 0xC00A -> 0xC014 -> 0xC026
+
+        k = Memory.alloc(3);
+        Output.printIntHexLn(k);    // 0xC00E   mem_free_list is 0xC014
+
+        l = Memory.alloc(4);
+        Output.printIntHexLn(l);    // 0xC02A   mem_free_list is 0xC014
+
+        Debug.memDump(0xc000, 8);
+
+        return;
+    }
+}

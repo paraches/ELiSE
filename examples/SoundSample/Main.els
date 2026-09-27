@@ -1,0 +1,51 @@
+class Main {
+    function void playNote(int lead, int harmony, int bass, int frames) {
+        do Sound.play3(lead, 11, harmony, 7, bass, 8, frames);
+        do Timer.waitFrames(frames);
+        return;
+    }
+
+    function void main() {
+        do MSX.screenInit();
+        do MSX.keyClick(false);
+        do Screen.color(15, 1, 1);
+        do Screen.cls();
+        do Screen.locate(1, 1);
+        do Output.printString("ORIGINAL BATTLE THEME");
+
+        do Timer.start();
+        do Sound.init();
+
+        // Original D minor-inspired 8-bit battle phrase.
+        do Main.playNote(190, 254, 762, 6);
+        do Main.playNote(160, 254, 762, 6);
+        do Main.playNote(127, 160, 762, 6);
+        do Main.playNote(143, 190, 1427, 6);
+        do Main.playNote(160, 214, 640, 6);
+        do Main.playNote(170, 214, 854, 6);
+        do Main.playNote(190, 254, 762, 12);
+
+        do Main.playNote(190, 254, 762, 6);
+        do Main.playNote(143, 190, 1427, 6);
+        do Main.playNote(127, 170, 1271, 6);
+        do Main.playNote(143, 190, 1427, 6);
+        do Main.playNote(160, 214, 640, 6);
+        do Main.playNote(170, 226, 678, 6);
+        do Main.playNote(190, 254, 762, 12);
+
+        do Main.playNote(214, 254, 762, 6);
+        do Main.playNote(190, 254, 762, 6);
+        do Main.playNote(160, 214, 640, 6);
+        do Main.playNote(143, 190, 1427, 6);
+        do Main.playNote(127, 170, 1271, 6);
+        do Main.playNote(143, 190, 1427, 6);
+        do Main.playNote(160, 214, 640, 6);
+        do Main.playNote(190, 254, 762, 12);
+
+        do Sound.stop();
+        do Timer.stop();
+        do Screen.locate(1, 3);
+        do Output.printString("DONE");
+        return;
+    }
+}

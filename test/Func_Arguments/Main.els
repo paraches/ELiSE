@@ -1,0 +1,51 @@
+#
+#   answer: 1, 1, 2, 116, 1
+#
+class Main {
+    function void main() {
+        var int i, j;
+
+        Main.nothing();
+        i = Main.retInt();
+        Output.printIntLn(i);
+        Main.argInt(i);
+        i = Main.argRetInt(i);
+        Output.printIntLn(i);
+
+        let i = 5;
+        let j = 1;
+        let i = Main.my_func(i, j);
+
+        do Output.printIntLn(i);
+        do Output.printIntLn(j);
+
+        return;
+    }
+
+    function void my_func(int x, int y) {
+        var int i, j;
+        let i = 10 + x;
+        let j = 100 + y;
+
+        return i + j;
+    }
+
+    function void nothing() {
+        return;
+    }
+
+    function int retInt() {
+        var int i;
+        i = 1;
+        return i;
+    }
+
+    function void argInt(int x) {
+        Output.printIntLn(x);
+        return;
+    }
+
+    function int argRetInt(int x) {
+        return x + 1;
+    }
+}

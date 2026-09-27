@@ -1,0 +1,649 @@
+class Breakout2 {
+    field int field_left, field_right, field_top, field_bottom;
+    field int brick_left, brick_right, brick_top, brick_bottom;
+    field int paddle_width;
+
+    field Array bricks;
+    field int paddle_x;
+    field int ball_x, ball_y;
+    field int paddle_pixel_x;
+    field int ball_pixel_x, ball_pixel_y;
+    field int ball_dx, ball_dy;
+    field int score, lives;
+    field int game_state, ready_timer, ready_count;
+    field int ball_delay, ball_delay_counter, bricks_cleared;
+    field int level, bricks_remaining;
+    field int combo, combo_points;
+    field int music_step, music_timer;
+    field boolean running;
+
+    constructor Breakout2 new() {
+        var int i;
+
+        let field_left = 0;
+        let field_right = 31;
+        let field_top = 1;
+        let field_bottom = 22;
+        let brick_left = 3;
+        let brick_right = 28;
+        let brick_top = 3;
+        let brick_bottom = 6;
+        let paddle_width = 4;
+
+        let bricks = Array.new(104);
+
+        let paddle_x = 14;
+        let paddle_pixel_x = 112;
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let bricks_remaining = 52;
+        let combo = 0;
+        let combo_points = 10;
+        let game_state = 0; // READY
+        let ready_timer = 30;
+        let ready_count = 3;
+        let ball_delay = 2;
+        let ball_delay_counter = 0;
+        let bricks_cleared = 0;
+        let music_step = 0;
+        let music_timer = 0;
+        let running = true;
+
+        do initializeStage();
+        do beginReady();
+        do initScreen();
+        do drawBoard();
+
+        return this;
+    }
+
+    method void initScreen() {
+        do MSX.screenInit();
+        do MSX.keyClick(false);
+        do Sound.init();
+        do Screen.color(15, 1, 1);
+        do Screen.cls();
+        do initTiles();
+        do initSprites();
+        return;
+    }
+
+    method void initTiles() {
+        var int tile_data, color_data;
+
+        dat tile_data = db
+        // 232: reserved brick tile
+            0x00,0x7e,0x7e,0x7e,0x7e,0x7e,0x7e,0x00,
+        // 233: top frame
+            0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,
+        // 234: bottom frame
+            0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,
+        // 235/236: centered vertical frame
+            0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+            0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+        // 237: top-left corner
+            0x1f,0x1f,0x18,0x18,0x18,0x18,0x18,0x18,
+        // 238: top-right corner
+            0xf8,0xf8,0x18,0x18,0x18,0x18,0x18,0x18,
+        // 239: bottom-left corner
+            0x18,0x18,0x18,0x18,0x1f,0x1f,0x00,0x00,
+        // 240: bottom-right corner
+            0x18,0x18,0x18,0x18,0xf8,0xf8,0x00,0x00,
+        // 241: empty
+            0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        // 242: left half of a 16x8 brick
+            0x00,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x00,
+        // 243: right half of a 16x8 brick
+            0x00,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0x00,
+        // 244/245: row 1 colored brick
+            0x00,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x00,
+            0x00,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0x00,
+        // 246/247: row 2 colored brick
+            0x00,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x00,
+            0x00,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0x00,
+        // 248/249: row 3 colored brick
+            0x00,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x00,
+            0x00,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0x00,
+        // 250/251: row 4 colored brick
+            0x00,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x00,
+            0x00,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0x00;
+
+        dat color_data = db
+        // 244/245: red
+            0x81,0x81,0x81,0x81,0x81,0x81,0x81,0x81,
+            0x81,0x81,0x81,0x81,0x81,0x81,0x81,0x81,
+        // 246/247: yellow
+            0xa1,0xa1,0xa1,0xa1,0xa1,0xa1,0xa1,0xa1,
+            0xa1,0xa1,0xa1,0xa1,0xa1,0xa1,0xa1,0xa1,
+        // 248/249: green
+            0xc1,0xc1,0xc1,0xc1,0xc1,0xc1,0xc1,0xc1,
+            0xc1,0xc1,0xc1,0xc1,0xc1,0xc1,0xc1,0xc1,
+        // 250/251: cyan
+            0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71,
+            0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71;
+
+        // Tile 232 starts at 232 * 8 = 0x0740 in each Screen 2 pattern page.
+        do Memory.LDIRVM(tile_data, 0x0740, 160);
+        do Memory.LDIRVM(tile_data, 0x0f40, 160);
+        do Memory.LDIRVM(tile_data, 0x1740, 160);
+
+        // Tile 244 starts at 244 * 8 = 0x07a0 in the color table.
+        do Memory.LDIRVM(color_data, 0x27a0, 64);
+        do Memory.LDIRVM(color_data, 0x2fa0, 64);
+        do Memory.LDIRVM(color_data, 0x37a0, 64);
+        return;
+    }
+
+    method void initSprites() {
+        var int sprite_data;
+
+        dat sprite_data = db
+        // 8x8 ball pattern
+            0x3c,0x7e,0xff,0xff,0xff,0xff,0x7e,0x3c,
+        // 8x8 paddle pattern
+            0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+            0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00;
+
+        do Sprite.init();
+        do Memory.LDIRVM(sprite_data, 0x3800, 16);
+        do Sprite.config(0);
+        return;
+    }
+
+    method void run() {
+        do Timer.start();
+
+        while (running) {
+            do updateMusic();
+            do readInput();
+            if (game_state == 0) {
+                do updateReady();
+            }
+            else {
+                if (ball_delay_counter > 0) {
+                    let ball_delay_counter = ball_delay_counter - 1;
+                }
+                else {
+                    do updateBall();
+                    let ball_delay_counter = ball_delay;
+                }
+            }
+            do draw();
+            do Sound.update();
+            do Timer.waitFrames(1);
+
+            if (Keyboard.isStopKey()) {
+                let running = false;
+            }
+        }
+
+        do Timer.stop();
+        do Sound.stop();
+        do showGameOver();
+        do bricks.deAlloc();
+        return;
+    }
+
+    method void updateMusic() {
+        if (music_timer > 0) {
+            let music_timer = music_timer - 1;
+            return;
+        }
+
+        // Original two-channel BGM: A carries the melody and C the bass.
+        // Channel B remains reserved for collision effects.
+        if (music_step == 0) {
+            do Sound.playAC(191, 8, 764, 6, 6);
+        }
+        elif (music_step == 1) {
+            do Sound.playAC(151, 8, 764, 6, 6);
+        }
+        elif (music_step == 2) {
+            do Sound.playAC(127, 8, 606, 6, 6);
+        }
+        elif (music_step == 3) {
+            do Sound.playAC(151, 8, 606, 6, 6);
+        }
+        elif (music_step == 4) {
+            do Sound.playAC(170, 8, 678, 6, 6);
+        }
+        elif (music_step == 5) {
+            do Sound.playAC(142, 8, 678, 6, 6);
+        }
+        elif (music_step == 6) {
+            do Sound.playAC(113, 8, 452, 6, 6);
+        }
+        else {
+            do Sound.playAC(142, 8, 678, 6, 6);
+        }
+
+        let music_step = music_step + 1;
+        if (music_step == 8) {
+            let music_step = 0;
+        }
+        let music_timer = 5;
+        return;
+    }
+
+    method void readInput() {
+        var int direction;
+
+        let direction = Keyboard.stick0();
+
+        if (direction == 7) {
+            if (paddle_x > field_left + 1) {
+                let paddle_x = paddle_x - 1;
+                let paddle_pixel_x = paddle_pixel_x - 8;
+            }
+        }
+        elif (direction == 3) {
+            if (paddle_x < field_right - paddle_width) {
+                let paddle_x = paddle_x + 1;
+                let paddle_pixel_x = paddle_pixel_x + 8;
+            }
+        }
+        return;
+    }
+
+    method void updateBall() {
+        var int next_x, next_y, hit_offset;
+        var int brick_index, brick_row_base, brick_screen_x;
+        var boolean brick_hit;
+
+        let next_x = ball_x + ball_dx;
+        let next_y = ball_y + ball_dy;
+        let brick_hit = false;
+
+        if (next_x <= field_left) {
+            let ball_dx = 1;
+            let next_x = field_left;
+            do Sound.playB(500, 8, 3);
+        }
+        elif (next_x >= field_right - 1) {
+            let ball_dx = -1;
+            let next_x = field_right - 1;
+            do Sound.playB(500, 8, 3);
+        }
+
+        if (next_y <= field_top + 1) {
+            let ball_dy = 1;
+            let next_y = field_top + 1;
+            do Sound.playB(500, 8, 3);
+        }
+
+        if ((next_y >= brick_top) & (next_y <= brick_bottom)) {
+            if ((next_x >= brick_left) & (next_x <= brick_right)) {
+                let brick_index = next_x - brick_left;
+                let brick_row_base = 0;
+                if ((brick_index & 1) == 1) {
+                    let brick_index = brick_index - 1;
+                }
+
+                if (next_y == brick_top + 1) {
+                    let brick_row_base = 26;
+                    let brick_index = brick_index + 26;
+                }
+                elif (next_y == brick_top + 2) {
+                    let brick_row_base = 52;
+                    let brick_index = brick_index + 52;
+                }
+                elif (next_y == brick_top + 3) {
+                    let brick_row_base = 78;
+                    let brick_index = brick_index + 78;
+                }
+                let brick_screen_x = brick_left + brick_index - brick_row_base;
+
+                if (bricks[brick_index] > 0) {
+                    let ball_dy = -ball_dy;
+                    let brick_hit = true;
+                    let bricks[brick_index] = bricks[brick_index] - 1;
+                    let bricks[brick_index + 1] = bricks[brick_index + 1] - 1;
+                    if (bricks[brick_index] == 0) {
+                        do Sound.playB(254, 10, 5);
+                        let bricks_remaining = bricks_remaining - 1;
+                        let score = score + combo_points;
+                        let combo = combo + 1;
+                        let combo_points = combo_points + 10;
+                        let bricks_cleared = bricks_cleared + 1;
+                        if (bricks_cleared == 24) {
+                            let ball_delay = 1;
+                        }
+                        elif (bricks_cleared == 44) {
+                            let ball_delay = 0;
+                        }
+                        do clearBrick(brick_screen_x, next_y);
+                        if (bricks_remaining == 0) {
+                            do advanceStage();
+                            return;
+                        }
+                    }
+                    else {
+                        do Sound.playB(350, 8, 3);
+                        do drawDamagedBrick(brick_screen_x, next_y);
+                    }
+                }
+            }
+        }
+
+        if (brick_hit == false) {
+            if ((next_y == field_bottom - 2) &
+                (next_x >= paddle_x) &
+                (next_x < paddle_x + paddle_width)) {
+                let ball_dy = -1;
+                let next_y = field_bottom - 2;
+                let hit_offset = next_x - paddle_x;
+                if (hit_offset <= 1) {
+                    let ball_dx = -1;
+                }
+                else {
+                    let ball_dx = 1;
+                }
+                do Sound.playB(180, 12, 5);
+            }
+            elif (next_y >= field_bottom) {
+                do Sound.playB(900, 12, 15);
+                let lives = lives - 1;
+                let combo = 0;
+                let combo_points = 10;
+                if (lives == 0) {
+                    let running = false;
+                    let next_y = field_bottom - 2;
+                }
+                else {
+                    do beginReady();
+                    return;
+                }
+            }
+        }
+
+        if (next_x > ball_x) {
+            let ball_pixel_x = ball_pixel_x + 8;
+        }
+        elif (next_x < ball_x) {
+            let ball_pixel_x = ball_pixel_x - 8;
+        }
+        if (next_y > ball_y) {
+            let ball_pixel_y = ball_pixel_y + 8;
+        }
+        elif (next_y < ball_y) {
+            let ball_pixel_y = ball_pixel_y - 8;
+        }
+
+        let ball_x = next_x;
+        let ball_y = next_y;
+        return;
+    }
+
+    method void resetBall() {
+        let ball_x = paddle_x + 1;
+        let ball_y = 18;
+        let ball_pixel_x = ball_x * 8;
+        let ball_pixel_y = 144;
+        let ball_dx = 1;
+        let ball_dy = -1;
+        return;
+    }
+
+    method void initializeStage() {
+        var int i, block_index, durability;
+
+        let bricks_remaining = 52;
+        let bricks_cleared = 0;
+        let combo = 0;
+        let combo_points = 10;
+        let ball_delay_counter = 0;
+
+        if (level == 1) {
+            let ball_delay = 2;
+        }
+        elif (level == 2) {
+            let ball_delay = 1;
+        }
+        else {
+            let ball_delay = 0;
+        }
+
+        let i = 0;
+        let block_index = 0;
+        while (i < 104) {
+            let durability = 1;
+            if (level == 2) {
+                if ((block_index & 1) == 0) {
+                    let durability = 2;
+                }
+            }
+            elif (level >= 3) {
+                let durability = 2;
+            }
+            let bricks[i] = durability;
+            let bricks[i + 1] = durability;
+            let i = i + 2;
+            let block_index = block_index + 1;
+        }
+        return;
+    }
+
+    method void advanceStage() {
+        let level = level + 1;
+        if (level > 3) {
+            let game_state = 2; // GAME CLEAR
+            let running = false;
+            return;
+        }
+        do initializeStage();
+        do beginReady();
+        do drawBoard();
+        return;
+    }
+
+    method void beginReady() {
+        let game_state = 0; // READY
+        let ready_timer = 30;
+        let ready_count = 3;
+        do resetBall();
+        return;
+    }
+
+    method void updateReady() {
+        let ball_x = paddle_x + 1;
+        let ball_pixel_x = ball_x * 8;
+        let ball_y = 18;
+        let ball_pixel_y = 144;
+
+        let ready_timer = ready_timer - 1;
+        if (ready_timer == 0) {
+            if (ready_count > 1) {
+                let ready_count = ready_count - 1;
+                let ready_timer = 30;
+            }
+            else {
+                let game_state = 1; // PLAYING
+                let ball_delay_counter = ball_delay;
+                let ball_dx = 1;
+                let ball_dy = -1;
+                do clearCenterMessage();
+            }
+        }
+        return;
+    }
+
+    method void draw() {
+        do drawSprites();
+        do drawStatus();
+        return;
+    }
+
+    method void drawBoard() {
+        var int row, col;
+
+        do drawBorder();
+
+        let row = brick_top;
+        while (row <= brick_bottom) {
+            do drawBrickRow(row);
+            let row = row + 1;
+        }
+
+        do clearCenterMessage();
+        do drawSprites();
+        do drawStatus();
+        return;
+    }
+
+    method void drawSprites() {
+        do Sprite.put(ball_pixel_x, ball_pixel_y, 0, 10, 0);
+        do Sprite.put(paddle_pixel_x, 168, 1, 9, 1);
+        do Sprite.put(paddle_pixel_x + 8, 168, 2, 9, 1);
+        do Sprite.put(paddle_pixel_x + 16, 168, 3, 9, 1);
+        do Sprite.put(paddle_pixel_x + 24, 168, 4, 9, 1);
+        return;
+    }
+
+    method void drawBorder() {
+        var int row, col;
+
+        do putCell(field_left, field_top, 237);
+        do putCell(field_right, field_top, 238);
+        do putCell(field_left, field_bottom, 239);
+        do putCell(field_right, field_bottom, 240);
+
+        let row = field_top + 1;
+        while (row < field_bottom) {
+            do putCell(field_left, row, 235);
+            do putCell(field_right, row, 236);
+            let row = row + 1;
+        }
+
+        let col = field_left + 1;
+        while (col < field_right) {
+            do putCell(col, field_top, 233);
+            do putCell(col, field_bottom, 234);
+            let col = col + 1;
+        }
+        return;
+    }
+
+    method void drawStatus() {
+        do Screen.locate(1, 24);
+        do Output.printString("SCORE ");
+        do Output.printInt(score);
+        do Output.printString(" L");
+        do Output.printInt(lives);
+        do Output.printString(" V");
+        do Output.printInt(level);
+        do Output.printString(" C");
+        do Output.printInt(combo);
+        do Screen.locate(13, 12);
+        if (game_state == 0) {
+            do Output.printString("READY ");
+            do Output.printInt(ready_count);
+        }
+        return;
+    }
+
+    method void clearCenterMessage() {
+        var int i;
+
+        let i = 0;
+        while (i < 19) {
+            do Screen.locate(10 + i, 12);
+            do Screen.putch(241);
+            let i = i + 1;
+        }
+        return;
+    }
+
+    method void showGameOver() {
+        do clearCenterMessage();
+        do Screen.locate(10, 12);
+        if (game_state == 2) {
+            do Output.printString("GAME CLEAR    ");
+        }
+        elif (lives == 0) {
+            do Output.printString("GAME OVER    ");
+        }
+        else {
+            do Output.printString("STOPPED       ");
+        }
+        return;
+    }
+
+    method void drawDamagedBrick(int x, int y) {
+        var int left_tile, right_tile;
+
+        let left_tile = 244;
+        let right_tile = 245;
+        if (y == brick_top + 1) {
+            let left_tile = 246;
+            let right_tile = 247;
+        }
+        elif (y == brick_top + 2) {
+            let left_tile = 248;
+            let right_tile = 249;
+        }
+        elif (y == brick_top + 3) {
+            let left_tile = 250;
+            let right_tile = 251;
+        }
+        do putCell(x, y, left_tile);
+        do putCell(x + 1, y, right_tile);
+        return;
+    }
+
+    method void putCell(int x, int y, int value) {
+        // Game cell coordinates are 0-based; MSX POSIT is 1-based.
+        do Screen.locate(x + 1, y + 1);
+        do Screen.putch(value);
+        return;
+    }
+
+    method void drawBrickRow(int row) {
+        var int col, brick_index, left_tile, right_tile;
+
+        let brick_index = 0;
+        let left_tile = 244;
+        let right_tile = 245;
+        if (row == brick_top + 1) {
+            let brick_index = 26;
+            let left_tile = 246;
+            let right_tile = 247;
+        }
+        elif (row == brick_top + 2) {
+            let brick_index = 52;
+            let left_tile = 248;
+            let right_tile = 249;
+        }
+        elif (row == brick_top + 3) {
+            let brick_index = 78;
+            let left_tile = 250;
+            let right_tile = 251;
+        }
+
+        let col = brick_left;
+        while (col <= brick_right) {
+            if (bricks[brick_index] == 2) {
+                do putCell(col, row, 242);
+                do putCell(col + 1, row, 243);
+            }
+            elif (bricks[brick_index] == 1) {
+                do putCell(col, row, left_tile);
+                do putCell(col + 1, row, right_tile);
+            }
+            else {
+                do putCell(col, row, 241);
+                do putCell(col + 1, row, 241);
+            }
+            let col = col + 2;
+            let brick_index = brick_index + 2;
+        }
+        return;
+    }
+
+    method void clearBrick(int x, int y) {
+        do putCell(x, y, 241);
+        do putCell(x + 1, y, 241);
+        return;
+    }
+
+}

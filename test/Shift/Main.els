@@ -1,0 +1,31 @@
+class Main {
+    function void main() {
+        var int a, b, c, d, e, f, g, h, shift, i, j, k;
+
+        let shift = 1;
+        let a = 0x8001 << shift;
+        let k = 0xABCD >> shift;
+        let b = 0xABCD >> 4;
+        let c = 1 + 2 << 3;
+        let d = 0xFF << 4 & 0x0F;
+        let e = 0x01 | 0x02 << 2;
+        let f = 1 << 16;
+        let g = 0x8000 >> 16;
+        let h = 1 + 2 * 3 << 1;
+        let i = a * 8;
+        let j = b * 16;
+
+        do Output.printIntHexLn(a);
+        do Output.printIntHexLn(b);
+        do Output.printIntHexLn(c);
+        do Output.printIntHexLn(d);
+        do Output.printIntHexLn(e);
+        do Output.printIntHexLn(f);
+        do Output.printIntHexLn(g);
+        do Output.printIntHexLn(h);
+        do Output.printIntHexLn(i);
+        do Output.printIntHexLn(j);
+        do Output.printIntHexLn(k);
+        return;
+    }
+}

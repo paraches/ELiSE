@@ -1,0 +1,35 @@
+#
+#   answer: 0, 20, 22, 1, 35, 34
+#
+class Enemy {
+    static int count;
+    field int num, x, y;
+
+    constructor Enemy new (int pX, int pY) {
+        let num = count;
+        let x = pX;
+        let y = pY;
+        let count = count + 1;
+
+        return this;
+    }
+
+    method void dispose() {
+        Memory.deAlloc(this);
+
+        return;
+    }
+
+    method void print() {
+        var int a, b;
+
+        let a = 5;
+        let b = a + 5;
+
+//        do Output.printIntLn(num);
+//        do Output.printIntLn(x + a);
+//        do Output.printIntLn(y + b);
+
+        return;
+    }
+}

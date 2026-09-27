@@ -1,0 +1,25 @@
+#
+#   answer: 6, 3, 2048, 4
+#
+class Main {
+    function void main() {
+	    var Array a, b;
+
+        let a = Array.new(3);
+        let a[0] = 1;
+        let a[1] = 5;
+        let a[2] = a[0] + a[1];
+
+        do Output.printIntLn(a[2]);
+        Output.printIntLn(a.count());
+
+        let b = Array.new(4);
+        let b[0] = 1024;
+        let b[3] = b[0] + b[0];
+
+        do Output.printIntLn(b[a[0] + 2]);
+        Output.printIntLn(b.count());
+
+        return;
+    }
+}
